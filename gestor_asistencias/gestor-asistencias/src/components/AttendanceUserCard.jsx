@@ -1,0 +1,93 @@
+import React from 'react';
+import { Card, Tag, Button, Space } from 'antd';
+import { 
+  UserOutlined, 
+  ClockCircleOutlined, 
+  LogoutOutlined,
+  CheckCircleOutlined,
+  WarningOutlined 
+} from '@ant-design/icons';
+
+const AttendanceUserCard = ({ attendance, onCheckOut, isActive }) => {
+  const formatTime = (dateTime) => {
+    if (!dateTime) return '--:--';
+    return new Date(dateTime).toLocaleTimeString('es-MX', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusTag = () => {
+    if (!attendance.checkOutTime) {
+      return <Tag color="blue">En curso</Tag>;
+    }
+    if (attendance.status === 'PRESENTE') {
+      return <Tag color="success" icon={<CheckCircleOutlined />}>Presente</Tag>;
+    }
+    if (attendance.status === 'AUSENTE') {
+      return <Tag color="warning" icon={<WarningOutlined />}>Ausente</Tag>;
+    }
+    if (attendance.status === 'TARDE') {
+      return <Tag color="orange" icon={<WarningOutlined />}>Tarde</Tag>;
+    }
+    return <Tag>{attendance.status}</Tag>;
+  };
+
+  return (
+    <Card
+      size="small"
+      style={{
+        borderColor: isActive ? '#1890ff' : '#d9d9d9',
+        background: isActive ? '#e6f7ff' : 'white'
+      }}
+    >
+      <Space direction="vertical" style={{ width: '100%' }} size="small">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Space>
+            <UserOutlined style={{ fontSize: 18 }} />
+            <span style={{ fontWeight: 600 }}>Usuario ID: {attendance.userId}</span>
+          </Space>
+          {getStatusTag()}
+        </div>
+
+        <div style={{ 
+          display: 'flex', 
+          gap: 20, 
+          padding: '8px 12px', 
+          background: '#fafafa', 
+          borderRadius: 4 
+        }}>
+          <div>
+            <div style={{ fontSize: 12, color: '#8c8c8c' }}>
+              <ClockCircleOutlined /> Entrada
+            </div>
+            <div style={{ fontWeight: 600 }}>
+              {formatTime(attendance.checkInTime)}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 12, color: '#8c8c8c' }}>
+              <LogoutOutlined /> Salida
+            </div>
+            <div style={{ fontWeight: 600 }}>
+              {formatTime(attendance.checkOutTime)}
+            </div>
+          </div>
+        </div>
+
+        {!attendance.checkOutTime && (
+          <Button
+            type="primary"
+            block
+            icon={<LogoutOutlined />}
+            onClick={() => onCheckOut(attendance.id)}
+          >
+            Registrar Salida
+          </Button>
+        )}
+      </Space>
+    </Card>
+  );
+};
+
+export default AttendanceUserCard;

@@ -1,0 +1,21 @@
+/* Estilos adicionales mínimos */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Opcional: ajustar algunos espacios */
+.ant-card-actions > li {
+  margin: 8px 0 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ant-layout-header {
+    padding: 0 20px !important;
+  }
+  
+  .ant-layout-content {
+    padding: 20px !important;
+  }
+}
