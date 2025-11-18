@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Layout, Typography, Row, Col, Spin, Alert, Empty } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 import { useCourses } from './hooks/useCourses';
@@ -10,20 +11,20 @@ const { Title, Paragraph } = Typography;
 
 function App() {
   const { courses, loading, error, addCourse, deleteCourse } = useCourses();
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleCreateCourse = async (courseData: CourseFormData) => {
+  const handleCreateCourse = async (courseData: any) => {
     await addCourse(courseData);
   };
 
-  const handleDeleteCourse = async (id) => {
+  const handleDeleteCourse = async (id: number) => {
     if (window.confirm('¿Estás seguro de eliminar este curso?')) {
       await deleteCourse(id);
     }
   };
 
-  const openAttendanceModal = (course) => {
+  const openAttendanceModal = (course: any) => {
     setSelectedCourse(course);
     setIsModalOpen(true);
   };
@@ -50,22 +51,14 @@ function App() {
         </Paragraph>
 
         {error && (
-          <Alert
-            message="Error"
-            description={error}
-            type="error"
-            closable
-            style={{ marginBottom: 20 }}
-          />
+          <Alert message="Error" description={error} type="error" closable style={{ marginBottom: 20 }} />
         )}
 
         <Row gutter={[24, 24]}>
-          {/* Formulario de creación */}
           <Col xs={24} lg={8}>
             <CourseForm onSubmit={handleCreateCourse} />
           </Col>
 
-          {/* Lista de cursos */}
           <Col xs={24} lg={16}>
             <Title level={4}>Cursos Registrados ({courses.length})</Title>
 
@@ -74,12 +67,9 @@ function App() {
                 <Spin size="large" />
               </div>
             ) : courses.length === 0 ? (
-              <Empty
-                description="No hay cursos registrados. Crea uno usando el formulario."
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
+              <Empty description="No hay cursos registrados. Crea uno usando el formulario." />
             ) : (
-              courses.map((course) => (
+              courses.map((course: any) => (
                 <CourseCard
                   key={course.id}
                   course={course}
@@ -91,16 +81,10 @@ function App() {
           </Col>
         </Row>
 
-        {/* Modal de asistencias */}
-        <AttendanceModal
-          course={selectedCourse}
-          isOpen={isModalOpen}
-          onClose={closeAttendanceModal}
-        />
+        <AttendanceModal course={selectedCourse} isOpen={isModalOpen} onClose={closeAttendanceModal} />
       </Content>
     </Layout>
   );
 }
 
 export default App;
-

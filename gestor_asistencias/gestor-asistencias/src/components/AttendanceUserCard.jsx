@@ -1,12 +1,5 @@
-import React from 'react';
 import { Card, Tag, Button, Space } from 'antd';
-import { 
-  UserOutlined, 
-  ClockCircleOutlined, 
-  LogoutOutlined,
-  CheckCircleOutlined,
-  WarningOutlined 
-} from '@ant-design/icons';
+import { UserOutlined, ClockCircleOutlined, LogoutOutlined, CheckCircleOutlined, WarningOutlined } from '@ant-design/icons';
 
 const AttendanceUserCard = ({ attendance, onCheckOut, isActive }) => {
   const formatTime = (dateTime) => {
@@ -21,14 +14,11 @@ const AttendanceUserCard = ({ attendance, onCheckOut, isActive }) => {
     if (!attendance.checkOutTime) {
       return <Tag color="blue">En curso</Tag>;
     }
-    if (attendance.status === 'PRESENTE') {
+    if (attendance.status === 'PRESENT') {
       return <Tag color="success" icon={<CheckCircleOutlined />}>Presente</Tag>;
     }
-    if (attendance.status === 'AUSENTE') {
-      return <Tag color="warning" icon={<WarningOutlined />}>Ausente</Tag>;
-    }
-    if (attendance.status === 'TARDE') {
-      return <Tag color="orange" icon={<WarningOutlined />}>Tarde</Tag>;
+    if (attendance.status === 'LATE') {
+      return <Tag color="warning" icon={<WarningOutlined />}>Tarde</Tag>;
     }
     return <Tag>{attendance.status}</Tag>;
   };
@@ -50,28 +40,18 @@ const AttendanceUserCard = ({ attendance, onCheckOut, isActive }) => {
           {getStatusTag()}
         </div>
 
-        <div style={{ 
-          display: 'flex', 
-          gap: 20, 
-          padding: '8px 12px', 
-          background: '#fafafa', 
-          borderRadius: 4 
-        }}>
+        <div style={{ display: 'flex', gap: 20, padding: '8px 12px', background: '#fafafa', borderRadius: 4 }}>
           <div>
             <div style={{ fontSize: 12, color: '#8c8c8c' }}>
               <ClockCircleOutlined /> Entrada
             </div>
-            <div style={{ fontWeight: 600 }}>
-              {formatTime(attendance.checkInTime)}
-            </div>
+            <div style={{ fontWeight: 600 }}>{formatTime(attendance.checkInTime)}</div>
           </div>
           <div>
             <div style={{ fontSize: 12, color: '#8c8c8c' }}>
               <LogoutOutlined /> Salida
             </div>
-            <div style={{ fontWeight: 600 }}>
-              {formatTime(attendance.checkOutTime)}
-            </div>
+            <div style={{ fontWeight: 600 }}>{formatTime(attendance.checkOutTime)}</div>
           </div>
         </div>
 
