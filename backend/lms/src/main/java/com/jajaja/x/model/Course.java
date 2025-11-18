@@ -31,7 +31,7 @@ public class Course {
     @Column(name = "inscritos_actuales")
     private Integer inscritosActuales = 0;
     
-    private String status = "ACTIVO";  // Texto simple en lugar de enum
+    private String status = "ACTIVO";  
     
     private String detalles;
     

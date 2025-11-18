@@ -45,11 +45,33 @@ export const useAttendance = (courseId) => {
     try {
       setError(null);
       const newAttendance = await attendanceService.checkIn(userId, courseId);
+      
       setAttendances([...attendances, newAttendance]);
+      
       await fetchCurrentlyInCourse();
+      
       return newAttendance;
     } catch (err) {
       setError(err.message);
+      await fetchTodayAttendances();
+      throw err;
+    }
+  };
+
+  const checkInLate = async (userId) => {
+    try {
+      setError(null);
+      const newAttendance = await attendanceService.checkInLate(userId, courseId);
+      
+      setAttendances([...attendances, newAttendance]);
+      
+     
+      await fetchCurrentlyInCourse();
+      
+      return newAttendance;
+    } catch (err) {
+      setError(err.message);
+      await fetchTodayAttendances();
       throw err;
     }
   };
@@ -57,16 +79,23 @@ export const useAttendance = (courseId) => {
   const checkOut = async (attendanceId) => {
     try {
       setError(null);
+      
+      
       const updatedAttendance = await attendanceService.checkOut(attendanceId);
+      
       setAttendances(
         attendances.map(att => 
           att.id === attendanceId ? updatedAttendance : att
         )
       );
+      
+      //refresca en 2 plano 
       await fetchCurrentlyInCourse();
+      
       return updatedAttendance;
     } catch (err) {
       setError(err.message);
+      await fetchTodayAttendances();
       throw err;
     }
   };
@@ -77,6 +106,7 @@ export const useAttendance = (courseId) => {
     loading,
     error,
     checkIn,
+    checkInLate,
     checkOut,
     refreshAttendances: fetchTodayAttendances
   };

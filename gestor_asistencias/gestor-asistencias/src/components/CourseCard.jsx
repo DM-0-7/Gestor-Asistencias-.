@@ -5,37 +5,37 @@ const CourseCard = ({ course, onDelete, onOpenAttendance }) => {
   const percentage = Math.round((course.inscritosActuales / course.maxPersonas) * 100);
   const hasMinimum = course.inscritosActuales >= course.minPersonas;
 
-  // 🚦 SEMÁFORO DE COLORES
+  //  SEMÁFORO DE COLORES
   const getProgressColor = () => {
     if (course.inscritosActuales < course.minPersonas) {
-      return '#1890ff'; // 🔵 Azul: No alcanzó mínimo
+      return '#1890ff'; 
     }
     if (percentage < 50) {
-      return '#52c41a'; // 🟢 Verde: Cupos disponibles
+      return '#52c41a'; 
     }
     if (percentage < 80) {
-      return '#faad14'; // 🟡 Amarillo: Medio lleno
+      return '#faad14'; 
     }
     if (percentage < 100) {
-      return '#ff7a45'; // 🟠 Naranja: Casi lleno
+      return '#ff7a45'; 
     }
-    return '#f5222d'; // 🔴 Rojo: Completo
+    return '#f5222d'; 
   };
 
   const getStatusMessage = () => {
     if (course.inscritosActuales < course.minPersonas) {
-      return '⚠️ No alcanzó mínimo requerido';
+      return ' No alcanzó mínimo requerido';
     }
     if (percentage < 50) {
-      return '✅ Cupos disponibles';
+      return 'Cupos disponibles';
     }
     if (percentage < 80) {
-      return '⚡ Medio lleno';
+      return ' Medio lleno';
     }
     if (percentage < 100) {
-      return '🔥 Casi lleno';
+      return ' Casi lleno';
     }
-    return '🚫 Completo';
+    return ' Completo';
   };
 
   return (
@@ -71,7 +71,7 @@ const CourseCard = ({ course, onDelete, onOpenAttendance }) => {
             <span>{course.inscritosActuales} / {course.maxPersonas}</span>
           </div>
           
-          {/* 🚦 BARRA DE PROGRESO CON COLORES SEMÁFORO */}
+          {/* BARRA DE PROGRESO CON COLORES SEMÁFORO */}
           <Progress 
             percent={percentage} 
             strokeColor={getProgressColor()}

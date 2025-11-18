@@ -13,28 +13,29 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
       message.warning('Ingresa un ID de usuario válido');
       return;
     }
-
+    
+    setProcesing(true);
     try {
       await checkIn(parseInt(userId));
       setUserId('');
-      message.success('✅ Check-in registrado exitosamente');
+      message.success(' Check-in registrado exitosamente');
     } catch (err) {
-      message.error(`❌ Error: ${err.message}`);
+      message.error(` Error: ${err.message}`);
     }
   };
 
   const handleCheckOut = async (attendanceId) => {
     try {
       await checkOut(attendanceId);
-      message.success('✅ Check-out registrado exitosamente');
+      message.success(' Check-out registrado exitosamente');
     } catch (err) {
-      message.error(`❌ Error: ${err.message}`);
+      message.error(` Error: ${err.message}`);
     }
   };
 
   return (
     <Modal
-      title={`📋 Asistencias - ${course?.nombre || ''}`}
+      title={` Asistencias - ${course?.nombre || ''}`}
       open={isOpen}
       onCancel={onClose}
       width={800}
@@ -61,7 +62,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
         </div>
 
         <div>
-          <h4>👥 Actualmente en el Curso ({currentlyIn.length})</h4>
+          <h4> Actualmente en el Curso ({currentlyIn.length})</h4>
           <Divider style={{ margin: '12px 0' }} />
           {currentlyIn.length === 0 ? (
             <Empty description="Nadie ha hecho check-in todavía" image={Empty.PRESENTED_IMAGE_SIMPLE} />
@@ -80,7 +81,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
         </div>
 
         <div>
-          <h4>📊 Asistencias de Hoy ({attendances.length})</h4>
+          <h4> Asistencias de Hoy ({attendances.length})</h4>
           <Divider style={{ margin: '12px 0' }} />
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40 }}>
