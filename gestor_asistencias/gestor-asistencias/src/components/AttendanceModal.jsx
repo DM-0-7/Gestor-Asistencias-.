@@ -1,35 +1,71 @@
 import { useState } from 'react';
 import { Modal, Input, Button, Space, Divider, Empty, message, Spin } from 'antd';
-import { LoginOutlined, UserOutlined } from '@ant-design/icons';
+import { LoginOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useAttendance } from '../hooks/useAttendance';
 import AttendanceUserCard from './AttendanceUserCard';
 
 const AttendanceModal = ({ course, isOpen, onClose }) => {
   const [userId, setUserId] = useState('');
-  const { attendances, currentlyIn, loading, checkIn, checkOut } = useAttendance(course?.id);
+  const [processing, setProcessing] = useState(false);
+  
+  const { 
+    attendances, 
+    currentlyIn, 
+    loading, 
+    checkIn, 
+    checkInLate,
+    checkOut 
+  } = useAttendance(course?.id);
 
   const handleCheckIn = async () => {
     if (!userId || userId.trim() === '') {
       message.warning('Ingresa un ID de usuario válido');
       return;
     }
-    
-    setProcesing(true);
+
+    console.log('handleCheckIn - userId:', userId);
+    setProcessing(true);
     try {
       await checkIn(parseInt(userId));
       setUserId('');
-      message.success(' Check-in registrado exitosamente');
+      message.success('Check-in registrado exitosamente');
+      await refreshAttendances();
+    } catch (err) {
+      message.error(`Error: ${err.message}`);
+    } finally {
+      setProcessing(false);  
+    }
+  };
+
+  const handleCheckInLate = async () => {
+    if (!userId || userId.trim() === '') {
+      message.warning('Ingresa un ID de usuario válido');
+      return;
+    }
+
+    console.log('handleCheckInLate - userId:', userId);
+    setProcessing(true);
+    try {
+      await checkInLate(parseInt(userId));
+      setUserId('');
+      message.warning(' Check-in registrado (TARDE)');
+      await refreshAttendances();
     } catch (err) {
       message.error(` Error: ${err.message}`);
+    } finally {
+      setProcessing(false);
     }
   };
 
   const handleCheckOut = async (attendanceId) => {
+    setProcessing(true);
     try {
       await checkOut(attendanceId);
-      message.success(' Check-out registrado exitosamente');
+      message.success('Check-out registrado exitosamente');
     } catch (err) {
       message.error(` Error: ${err.message}`);
+    } finally {
+      setProcessing(false); 
     }
   };
 
@@ -45,7 +81,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         <div style={{ background: '#f5f5f5', padding: 16, borderRadius: 8 }}>
           <h4>Registrar Entrada</h4>
-          <Space.Compact style={{ width: '100%' }}>
+          <Space.Compact style={{ width: '100%', marginBottom: 12 }}>
             <Input
               placeholder="ID del usuario"
               type="number"
@@ -54,18 +90,44 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
               onPressEnter={handleCheckIn}
               prefix={<UserOutlined />}
               size="large"
+              disabled={processing}
             />
-            <Button type="primary" icon={<LoginOutlined />} onClick={handleCheckIn} size="large">
-              Check-in
-            </Button>
           </Space.Compact>
+          
+          <Space style={{ width: '100%' }}>
+            <Button 
+              type="primary" 
+              icon={<LoginOutlined />}
+              onClick={handleCheckIn}
+              size="large"
+              style={{ flex: 1 }}
+              loading={processing}
+              disabled={processing}
+            >
+               A Tiempo
+            </Button>
+            <Button 
+              danger
+              icon={<ClockCircleOutlined />}
+              onClick={handleCheckInLate}
+              size="large"
+              style={{ flex: 1 }}
+              loading={processing}
+              disabled={processing}
+            >
+               Llegó Tarde
+            </Button>
+          </Space>
         </div>
 
         <div>
-          <h4> Actualmente en el Curso ({currentlyIn.length})</h4>
+          <h4>Actualmente en el Curso ({currentlyIn.length})</h4>
           <Divider style={{ margin: '12px 0' }} />
           {currentlyIn.length === 0 ? (
-            <Empty description="Nadie ha hecho check-in todavía" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            <Empty 
+              description="Nadie ha hecho check-in todavía" 
+              image={Empty.PRESENTED_IMAGE_SIMPLE} 
+            />
           ) : (
             <Space direction="vertical" style={{ width: '100%' }}>
               {currentlyIn.map((attendance) => (
@@ -74,6 +136,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
                   attendance={attendance}
                   onCheckOut={handleCheckOut}
                   isActive={true}
+                  disabled={processing}
                 />
               ))}
             </Space>
@@ -88,7 +151,10 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
               <Spin size="large" />
             </div>
           ) : attendances.length === 0 ? (
-            <Empty description="No hay registros de asistencia hoy" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            <Empty 
+              description="No hay registros de asistencia hoy" 
+              image={Empty.PRESENTED_IMAGE_SIMPLE} 
+            />
           ) : (
             <Space direction="vertical" style={{ width: '100%' }}>
               {attendances.map((attendance) => (
@@ -97,6 +163,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
                   attendance={attendance}
                   onCheckOut={handleCheckOut}
                   isActive={!attendance.checkOutTime}
+                  disabled={processing}
                 />
               ))}
             </Space>

@@ -49,7 +49,7 @@ const CourseForm = ({ onSubmit }) => {
           name="lugar"
           rules={[{ required: true, message: 'Ingresa el lugar' }]}
         >
-          <Input placeholder="Ej: Aula 301" />
+          <Input placeholder="Ej: Cam Q2" />
         </Form.Item>
 
         <Form.Item label="Min. Personas" style={{ display: 'inline-block', width: 'calc(50% - 8px)' }}>

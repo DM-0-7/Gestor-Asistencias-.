@@ -41,6 +41,8 @@ public class AttendanceService {
     
     @Transactional
     public Attendance checkInLate(Long userId, Long courseId) {
+        System.out.println("Registrando check-in tarde para userId: " + userId + ", courseId: " + courseId);
+        
         var existing = attendanceRepository.findByUserIdAndCourseIdAndAttendanceDate(
             userId, courseId, LocalDate.now()
         );
@@ -57,7 +59,9 @@ public class AttendanceService {
         attendance.setStatus("LATE");
         attendance.setCreatedAt(LocalDateTime.now());
         
-        return attendanceRepository.save(attendance);
+        Attendance saved = attendanceRepository.save(attendance);
+        System.out.println("Check-in tarde registrado con ID: " + saved.getId());
+        return saved;
     }
     
     @Transactional

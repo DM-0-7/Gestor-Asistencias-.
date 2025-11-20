@@ -23,6 +23,16 @@ public class AttendanceController {
     ) {
         return ResponseEntity.ok(attendanceService.checkIn(userId, courseId));
     }
+
+    @PostMapping ("/check-in-late")
+    public ResponseEntity<Attendance> checkInLate(
+    @RequestParam Long userId,  
+    @RequestParam Long courseId
+    ) {
+        Attendance attendance = attendanceService.checkInLate(userId, courseId);
+        System.out.println("Check-in tarde registrado- Usuario:" + userId + ", ID " + attendance.getId());
+        return ResponseEntity.ok(attendance);
+    }
     
     @PostMapping("/check-out/{attendanceId}")
     public ResponseEntity<Attendance> checkOut(@PathVariable Long attendanceId) {
@@ -38,13 +48,6 @@ public class AttendanceController {
     public ResponseEntity<List<Attendance>> getCurrentlyInCourse(@PathVariable Long courseId) {
         return ResponseEntity.ok(attendanceService.getCurrentlyInCourse(courseId));
     }
-
-    @PostMapping ("/check-in-late")
-    public ResponseEntity<Attendance> checkInLate(
-    @RequestParam Long userId, 
-    @RequestParam Long courseId
-    ) {
-    Attendance attendance = attendanceService.checkInLate(userId, courseId);
-    return ResponseEntity.ok(attendance);
+ {
     }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout, Typography, Row, Col, Spin, Alert, Empty } from 'antd';
-import { BookOutlined } from '@ant-design/icons';
+import Mialogo from './assets/LogoMIAA.svg';
 import { useCourses } from './hooks/useCourses';
 import CourseForm from './components/CourseForm';
 import CourseCard from './components/CourseCard';
@@ -35,13 +35,38 @@ function App() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ background: '#1890ff', padding: '0 50px' }}>
-        <div style={{ color: 'white', display: 'flex', alignItems: 'center', height: '100%' }}>
-          <BookOutlined style={{ fontSize: 24, marginRight: 12 }} />
-          <Title level={3} style={{ color: 'white', margin: 0 }}>
-            Gestor de Asistencia
-          </Title>
+   <Layout style={{ minHeight: '100vh' }}>
+      <Header style={{ 
+        background: '#00356c|', 
+        padding: '0 50px',
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        <div className='logo' style={{
+          display: 'flex',
+          alignItems: 'center',
+          color: 'white'
+        }}>
+          <img
+            src={Mialogo}
+            alt='MIAA Logo'
+            style={{
+              height: 61,
+              width: 'auto',  
+              marginRight: 15, 
+              objectFit: 'contain',
+              background: 'trasparent',
+              padding: '4px',
+              borderRadius: '4px'
+            }}
+          />
+          <span style={{ 
+            fontSize: 18, 
+            fontWeight: 600,
+            color: 'white'
+          }}>
+            Gestor de Asistencias
+          </span>
         </div>
       </Header>
 

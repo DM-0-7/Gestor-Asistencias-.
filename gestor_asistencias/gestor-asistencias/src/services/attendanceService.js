@@ -4,9 +4,20 @@ const API_URL = 'http://localhost:8080/api/attendance';
 
 export const attendanceService = {
   checkIn: async (userId, courseId) => {
+    console.log("Registrando check-in para userId: " + userId + ", courseId: " + courseId);
     const response = await axios.post(
       `${API_URL}/check-in?userId=${userId}&courseId=${courseId}`
     );
+    console.log('Respuesta del servidor:', response.data);
+    return response.data;
+  },
+  
+  checkinLate: async (userId, courseId) => {
+    console.log("Registrando check-in tarde para userId: " + userId + ", courseId: " + courseId);
+    const response = await axios.post(
+      `${API_URL}/check-in-late?userId=${userId}&courseId=${courseId}`
+    );
+    console.log('Respuesta del servidor:', response.data);
     return response.data;
   },
 
