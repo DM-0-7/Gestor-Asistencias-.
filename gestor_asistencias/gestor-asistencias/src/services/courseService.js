@@ -14,9 +14,16 @@ export const courseService = {
   },
 
   create: async (courseData) => {
+    try {
     const response = await axios.post(`${API_URL}/courses`, courseData);
     return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.message ||
+      'Error desconocido';
+      throw new Error(message);
+    }
   },
+
 
   update: async (id, courseData) => {
     const response = await axios.put(`${API_URL}/courses/${id}`, courseData);

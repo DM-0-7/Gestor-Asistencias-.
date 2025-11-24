@@ -14,7 +14,8 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
     loading, 
     checkIn, 
     checkInLate,
-    checkOut 
+    checkOut,
+    refreshAttendances
   } = useAttendance(course?.id);
 
   const handleCheckIn = async () => {
@@ -23,17 +24,16 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
       return;
     }
 
-    console.log('handleCheckIn - userId:', userId);
     setProcessing(true);
     try {
       await checkIn(parseInt(userId));
       setUserId('');
-      message.success('Check-in registrado exitosamente');
-      await refreshAttendances();
+      message.success(' Check-in registrado (A tiempo)');
     } catch (err) {
-      message.error(`Error: ${err.message}`);
+      console.error(' Error en handleCheckIn:', err);
+      message.error(` Error: ${err.message}`);
     } finally {
-      setProcessing(false);  
+      setProcessing(false);
     }
   };
 
@@ -43,15 +43,14 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
       return;
     }
 
-    console.log('handleCheckInLate - userId:', userId);
     setProcessing(true);
     try {
       await checkInLate(parseInt(userId));
       setUserId('');
       message.warning(' Check-in registrado (TARDE)');
-      await refreshAttendances();
     } catch (err) {
-      message.error(` Error: ${err.message}`);
+      console.error(' Error en handleCheckInLate:', err);
+      message.error(` ${err.message}`);
     } finally {
       setProcessing(false);
     }
@@ -61,17 +60,18 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
     setProcessing(true);
     try {
       await checkOut(attendanceId);
-      message.success('Check-out registrado exitosamente');
+      message.success(' Check-out registrado exitosamente');
     } catch (err) {
-      message.error(` Error: ${err.message}`);
+      console.error(' Error capturado', err);
+      message.error(`${err.message}`);
     } finally {
-      setProcessing(false); 
+      setProcessing(false);
     }
   };
 
   return (
     <Modal
-      title={` Asistencias - ${course?.nombre || ''}`}
+      title={`Asistencias - ${course?.nombre || ''}`}
       open={isOpen}
       onCancel={onClose}
       width={800}
@@ -121,13 +121,10 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
         </div>
 
         <div>
-          <h4>Actualmente en el Curso ({currentlyIn.length})</h4>
+          <h4> Actualmente en el Curso ({currentlyIn.length})</h4>
           <Divider style={{ margin: '12px 0' }} />
           {currentlyIn.length === 0 ? (
-            <Empty 
-              description="Nadie ha hecho check-in todavía" 
-              image={Empty.PRESENTED_IMAGE_SIMPLE} 
-            />
+            <Empty description="Nadie ha hecho check-in todavía" image={Empty.PRESENTED_IMAGE_SIMPLE} />
           ) : (
             <Space direction="vertical" style={{ width: '100%' }}>
               {currentlyIn.map((attendance) => (
@@ -151,10 +148,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
               <Spin size="large" />
             </div>
           ) : attendances.length === 0 ? (
-            <Empty 
-              description="No hay registros de asistencia hoy" 
-              image={Empty.PRESENTED_IMAGE_SIMPLE} 
-            />
+            <Empty description="No hay registros de asistencia hoy" image={Empty.PRESENTED_IMAGE_SIMPLE} />
           ) : (
             <Space direction="vertical" style={{ width: '100%' }}>
               {attendances.map((attendance) => (
@@ -175,3 +169,4 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
 };
 
 export default AttendanceModal;
+

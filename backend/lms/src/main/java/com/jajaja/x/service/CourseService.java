@@ -6,15 +6,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CourseService {
-    
     private final CourseRepository courseRepository;
     
     @Transactional
     public Course createCourse(Course course) {
+        Optional<Course> existente =
+    courseRepository.findByNombreAndHorarioAndLugar(course.getNombre(), course.getHorario(), course.getLugar()
+    );
+    if (existente.isPresent()) {
+        throw new RuntimeException("Ya existe un curso con el mismo nombre, horario y lugar");
+    }
         return courseRepository.save(course);
     }
     
@@ -43,4 +49,14 @@ public class CourseService {
     public void deleteCourse(Long id) {
         courseRepository.deleteById(id);
     }
+     public Course crearCurso(Course curso) {
+        Optional<Course> existente = courseRepository.findByNombreAndHorarioAndLugar(
+            curso.getNombre(), curso.getHorario(), curso.getLugar()
+        );
+        if (existente.isPresent()) {
+            throw new RuntimeException("Ya existe un curso con el mismo nombre, horario y lugar");
+        }
+        return courseRepository.save(curso);
+    }
 }
+

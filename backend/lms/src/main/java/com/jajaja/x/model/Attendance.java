@@ -23,11 +23,11 @@ public class Attendance {
     @Column(name = "attendance_date", nullable = false)
     private LocalDate attendanceDate;
     
-    // ENTRADA
+
     @Column(name = "check_in_time")
     private LocalDateTime checkInTime;
     
-    // SALIDA
+    
     @Column(name = "check_out_time")
     private LocalDateTime checkOutTime;
     

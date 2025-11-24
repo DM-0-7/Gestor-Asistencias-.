@@ -22,6 +22,11 @@ export const useCourses = () => {
 
   useEffect(() => {
     fetchCourses();
+
+    const interval = setInterval(() => {
+      fetchCourses();
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const addCourse = async (courseData) => {

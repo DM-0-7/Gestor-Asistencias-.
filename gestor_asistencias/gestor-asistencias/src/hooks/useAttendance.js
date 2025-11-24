@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { attendanceService } from '../services/attendanceService';
 
 export const useAttendance = (courseId) => {
@@ -7,7 +7,7 @@ export const useAttendance = (courseId) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchTodayAttendances = async () => {
+  const fetchTodayAttendances = useCallback(async () => {
     if (!courseId) return;
     
     try {
@@ -16,14 +16,14 @@ export const useAttendance = (courseId) => {
       const data = await attendanceService.getTodayAttendances(courseId);
       setAttendances(data);
     } catch (err) {
+      console.error('Error loading today attendances:', err);
       setError(err.message);
-      console.error('Error loading attendances:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId]);
 
-  const fetchCurrentlyInCourse = async () => {
+  const fetchCurrentlyInCourse = useCallback(async () => {
     if (!courseId) return;
     
     try {
@@ -32,73 +32,83 @@ export const useAttendance = (courseId) => {
     } catch (err) {
       console.error('Error loading currently in course:', err);
     }
-  };
+  }, [courseId]);
 
   useEffect(() => {
     if (courseId) {
       fetchTodayAttendances();
       fetchCurrentlyInCourse();
     }
-  }, [courseId]);
+  }, [courseId, fetchTodayAttendances, fetchCurrentlyInCourse]);
 
-  const checkIn = async (userId) => {
+  const checkIn = useCallback(async (userId) => {
+    if (!courseId) return;
+    
     try {
       setError(null);
       const newAttendance = await attendanceService.checkIn(userId, courseId);
       
-      setAttendances([...attendances, newAttendance]);
+      // Actualización local
+      setAttendances(prev => [...prev, newAttendance]);
       
       await fetchCurrentlyInCourse();
+      await fetchTodayAttendances();
       
       return newAttendance;
     } catch (err) {
+      console.error('Error in checkIn:', err);
       setError(err.message);
-      await fetchTodayAttendances();
       throw err;
     }
-  };
+  }, [courseId, fetchCurrentlyInCourse, fetchTodayAttendances]);
 
-  const checkInLate = async (userId) => {
+  const checkInLate = useCallback(async (userId) => {
+    if (!courseId) return;
+    
     try {
       setError(null);
+      console.log(' useAttendance - checkInLate llamado con userId:', userId);
+      
       const newAttendance = await attendanceService.checkInLate(userId, courseId);
       
-      setAttendances([...attendances, newAttendance]);
+      console.log(' Respuesta de checkInLate:', newAttendance);
       
-     
+      // Actualización local
+      setAttendances(prev => [...prev, newAttendance]);
+      
+      
       await fetchCurrentlyInCourse();
+      await fetchTodayAttendances();
       
       return newAttendance;
     } catch (err) {
+      console.error(' Error in checkInLate:', err);
       setError(err.message);
-      await fetchTodayAttendances();
       throw err;
     }
-  };
+  }, [courseId, fetchCurrentlyInCourse, fetchTodayAttendances]);
 
-  const checkOut = async (attendanceId) => {
+  const checkOut = useCallback(async (attendanceId) => {
     try {
       setError(null);
-      
-      
       const updatedAttendance = await attendanceService.checkOut(attendanceId);
       
-      setAttendances(
-        attendances.map(att => 
-          att.id === attendanceId ? updatedAttendance : att
-        )
+      // Actualización local
+      setAttendances(prev =>
+        prev.map(att => att.id === attendanceId ? updatedAttendance : att)
       );
       
-      //refresca en 2 plano 
+      
       await fetchCurrentlyInCourse();
+      await fetchTodayAttendances();
       
       return updatedAttendance;
     } catch (err) {
+      console.error('Error in checkOut:', err);
       setError(err.message);
-      await fetchTodayAttendances();
       throw err;
     }
-  };
+  }, [fetchCurrentlyInCourse, fetchTodayAttendances]);
 
   return {
     attendances,
@@ -106,7 +116,7 @@ export const useAttendance = (courseId) => {
     loading,
     error,
     checkIn,
-    checkInLate,
+    checkInLate, 
     checkOut,
     refreshAttendances: fetchTodayAttendances
   };
