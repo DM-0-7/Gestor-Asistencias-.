@@ -25,9 +25,9 @@ export const useCourses = () => {
 
     const interval = setInterval(() => {
       fetchCourses();
-    }, 5000);
+    }, 8000);
     return () => clearInterval(interval);
-  }, []);
+  }, []); 
 
   const addCourse = async (courseData) => {
     try {

@@ -62,4 +62,10 @@ export const attendanceService = {
       throw error;
     }
   }
-};
+  ,
+
+ getUserAttendanceHistory: async (userId) => {
+  const response = await axios.get(`${API_URL}/user/${userId}/history`);
+  return response.data;
+    }
+  };

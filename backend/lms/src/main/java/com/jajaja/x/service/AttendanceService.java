@@ -129,6 +129,9 @@ public Attendance checkIn(Long userId, Long courseId) {
         return attendanceRepository.findByCourseIdAndCheckOutTimeIsNull(courseId);
     }
     
+    public List<Attendance> getAttendanceHistory(Long userId) {
+        return attendanceRepository.findByUserIdOrderByAttendanceDateDesc(userId);
+    }
     
     private void updateCourseAttendeeCount(Long courseId) {
         System.out.println(" Actualizando contador de curso " + courseId);

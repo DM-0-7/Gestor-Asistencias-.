@@ -48,6 +48,9 @@ public class AttendanceController {
     public ResponseEntity<List<Attendance>> getCurrentlyInCourse(@PathVariable Long courseId) {
         return ResponseEntity.ok(attendanceService.getCurrentlyInCourse(courseId));
     }
- {
+    
+    @GetMapping("/user/{userId}/history")
+    public ResponseEntity<List<Attendance>> getUserAttendanceHistory(@PathVariable Long userId) {
+        return ResponseEntity.ok(attendanceService.getAttendanceHistory(userId));
     }
 }
