@@ -1,7 +1,14 @@
-import { Card, Tag, Button, Space } from 'antd';
-import { UserOutlined, ClockCircleOutlined, LogoutOutlined, CheckCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { Card, Tag, Button, Space, Popconfirm } from 'antd';
+import { 
+  UserOutlined, 
+  ClockCircleOutlined, 
+  LogoutOutlined, 
+  CheckCircleOutlined, 
+  WarningOutlined,
+  DeleteOutlined  
+} from '@ant-design/icons';
 
-const AttendanceUserCard = ({ attendance, onCheckOut, isActive }) => {
+const AttendanceUserCard = ({ attendance, onCheckOut, onDelete, isActive }) => {
   const formatTime = (dateTime) => {
     if (!dateTime) return '--:--';
     return new Date(dateTime).toLocaleTimeString('es-MX', {
@@ -56,14 +63,32 @@ const AttendanceUserCard = ({ attendance, onCheckOut, isActive }) => {
         </div>
 
         {!attendance.checkOutTime && (
-          <Button
-            type="primary"
-            block
-            icon={<LogoutOutlined />}
-            onClick={() => onCheckOut(attendance.id)}
-          >
-            Registrar Salida
-          </Button>
+          <Space style={{ width: '100%' }}>
+            <Button
+              type="primary"
+              style={{ flex: 1 }}
+              icon={<LogoutOutlined />}
+              onClick={() => onCheckOut(attendance.id)}
+            >
+              Registrar Salida
+            </Button>
+            
+            <Popconfirm
+              title="¿Eliminar esta asistencia?"
+              description="Esta acción no se puede deshacer"
+              onConfirm={() => onDelete(attendance.id)}
+              okText="Sí, eliminar"
+              cancelText="Cancelar"
+              okButtonProps={{ danger: true }}
+            >
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+              >
+                Eliminar
+              </Button>
+            </Popconfirm>
+          </Space>
         )}
       </Space>
     </Card>

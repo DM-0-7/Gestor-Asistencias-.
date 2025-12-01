@@ -63,12 +63,36 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
       message.success(' Check-out registrado exitosamente');
     } catch (err) {
       console.error(' Error capturado', err);
-      message.error(`${err.message}`);
+      message.error(` ${err.message}`);
     } finally {
       setProcessing(false);
     }
   };
 
+  const handleDelete = async (attendanceId) => {
+    setProcessing(true);
+    try {
+      const response = await fetch(`http://localhost:8080/api/courses/asistencias/${attendanceId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error al eliminar asistencia');
+      }
+
+      message.success(' Asistencia eliminada correctamente');
+      await refreshAttendances();
+      
+    } catch (err) {
+      console.error(' Error al eliminar:', err);
+      message.error(` ${err.message}`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+ 
   return (
     <Modal
       title={`Asistencias - ${course?.nombre || ''}`}
@@ -132,6 +156,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
                   key={attendance.id}
                   attendance={attendance}
                   onCheckOut={handleCheckOut}
+                  onDelete={handleDelete}
                   isActive={true}
                   disabled={processing}
                 />
@@ -156,6 +181,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
                   key={attendance.id}
                   attendance={attendance}
                   onCheckOut={handleCheckOut}
+                  onDelete={handleDelete} 
                   isActive={!attendance.checkOutTime}
                   disabled={processing}
                 />
@@ -169,4 +195,3 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
 };
 
 export default AttendanceModal;
-

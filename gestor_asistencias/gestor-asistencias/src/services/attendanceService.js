@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/attendance';
+const API_URL = 'http://localhost:8080/api/attendances';
 
 export const attendanceService = {
   checkIn: async (userId, courseId) => {

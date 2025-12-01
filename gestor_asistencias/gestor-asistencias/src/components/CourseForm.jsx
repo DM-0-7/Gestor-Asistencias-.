@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Form, Input, InputNumber, Button, Card } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { Select } from 'antd';
 
 const { TextArea } = Input;
 
@@ -45,12 +46,19 @@ const CourseForm = ({ onSubmit }) => {
         </Form.Item>
 
         <Form.Item
-          label="Lugar"
-          name="lugar"
-          rules={[{ required: true, message: 'Ingresa el lugar' }]}
-        >
-          <Input placeholder="Ej: Cam Q2" />
-        </Form.Item>
+  label="Lugar"
+  name="lugar"
+  rules={[{ required: true, message: 'Selecciona un lugar' }]}
+>
+  <Select
+    placeholder="Selecciona el Lugar"
+    options={[
+      { value: 'CamQ2', label: 'CamQ2' },
+      { value: 'Quesada Limón', label: 'Quesada Limón' }
+    ]}
+  />
+</Form.Item>
+
 
         <Form.Item label="Min. Personas" style={{ display: 'inline-block', width: 'calc(50% - 8px)' }}>
           <Form.Item name="minPersonas" noStyle rules={[{ required: true, message: 'Requerido' }]}>

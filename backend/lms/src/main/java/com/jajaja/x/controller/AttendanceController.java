@@ -9,12 +9,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/attendance")
+@RequestMapping("/api/attendances")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class AttendanceController {
     
     private final AttendanceService attendanceService;
+      @GetMapping("/course/{courseId}/all")
+    public ResponseEntity<List<Attendance>> getAllCourseAttendances(@PathVariable Long courseId) {
+        System.out.println("Solicitud recibida para obtener todas las asistencias del curso ID: " + courseId);
+        return ResponseEntity.ok(attendanceService.getAllCourseAttendances(courseId));
+    }
     
     @PostMapping("/check-in")
     public ResponseEntity<Attendance> checkIn(
@@ -53,4 +58,9 @@ public class AttendanceController {
     public ResponseEntity<List<Attendance>> getUserAttendanceHistory(@PathVariable Long userId) {
         return ResponseEntity.ok(attendanceService.getAttendanceHistory(userId));
     }
+    @GetMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("AttendanceController funcionando correctamente");
+}
+
 }

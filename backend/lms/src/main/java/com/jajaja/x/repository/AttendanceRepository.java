@@ -19,6 +19,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     );
     
     List<Attendance> findByUserIdOrderByAttendanceDateDesc(Long userId);
-    
+
+    List<Attendance> findByCourseIdOrderByCheckInTimeDesc(Long courseId);
     
 }
