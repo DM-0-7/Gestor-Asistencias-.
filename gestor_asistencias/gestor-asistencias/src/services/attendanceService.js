@@ -1,71 +1,80 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/attendances';
+const API_BASE_URL = 'http://localhost:8080/api/attendances';
 
 export const attendanceService = {
+
+  getAllCourseAttendances: async (courseId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/course/${courseId}/all`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data || 'Error al obtener historial de asistencias');
+    }
+  },
+
+
+  getTodayAttendances: async (courseId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/course/${courseId}/today`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data || 'Error al obtener asistencias de hoy');
+    }
+  },
+
+
+  getCurrentlyInCourse: async (courseId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/course/${courseId}/currently-in`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data || 'Error al obtener usuarios actualmente en curso');
+    }
+  },
+
   checkIn: async (userId, courseId) => {
     try {
       const response = await axios.post(
-        `${API_URL}/check-in?userId=${userId}&courseId=${courseId}`
+        `${API_BASE_URL}/check-in?userId=${userId}&courseId=${courseId}`
       );
       return response.data;
     } catch (error) {
-      
-      const message = error.response?.data?.message || error.message || 'Error desconocido';
-      console.error(' Error en checkIn:', message);
-      throw new Error(message);  
+      throw new Error(error.response?.data || 'Error al hacer check-in');
     }
   },
+
 
   checkInLate: async (userId, courseId) => {
     try {
       const response = await axios.post(
-        `${API_URL}/check-in-late?userId=${userId}&courseId=${courseId}`
+        `${API_BASE_URL}/check-in-late?userId=${userId}&courseId=${courseId}`
       );
       return response.data;
     } catch (error) {
-      
-      const message = error.response?.data?.message || error.message || 'Error desconocido';
-      console.error(' Error en checkInLate:', message);
-      throw new Error(message);
+      throw new Error(error.response?.data || 'Error al hacer check-in tarde');
     }
   },
+
 
   checkOut: async (attendanceId) => {
     try {
-      const response = await axios.post(`${API_URL}/check-out/${attendanceId}`);
+      const response = await axios.post(
+        `${API_BASE_URL}/${attendanceId}/check-out`
+      );
       return response.data;
     } catch (error) {
-      
-      const message = error.response?.data?.message || error.message || 'Error desconocido';
-      console.error('Error en checkOut:', message);
-      throw new Error(message);
+      throw new Error(error.response?.data || 'Error al hacer check-out');
     }
   },
 
-  getTodayAttendances: async (courseId) => {
+  // NUEVO: Obtener historial de un usuario específico
+  getUserAttendanceHistory: async (userId) => {
     try {
-      const response = await axios.get(`${API_URL}/course/${courseId}/today`);
+      const response = await axios.get(`${API_BASE_URL}/user/${userId}/history`);
       return response.data;
     } catch (error) {
-      console.error(' Error al obtener asistencias de hoy:', error);
-      throw error;
-    }
-  },
-
-  getCurrentlyInCourse: async (courseId) => {
-    try {
-      const response = await axios.get(`${API_URL}/course/${courseId}/currently-in`);
-      return response.data;
-    } catch (error) {
-      console.error(' Error al obtener currently-in:', error);
-      throw error;
+      throw new Error(error.response?.data || 'Error al obtener historial del usuario');
     }
   }
-  ,
-
- getUserAttendanceHistory: async (userId) => {
-  const response = await axios.get(`${API_URL}/user/${userId}/history`);
-  return response.data;
-    }
-  };
+};

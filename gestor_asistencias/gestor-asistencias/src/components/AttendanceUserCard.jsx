@@ -27,7 +27,9 @@ const AttendanceUserCard = ({ attendance, onCheckOut, onDelete, isActive }) => {
     if (attendance.status === 'LATE') {
       return <Tag color="warning" icon={<WarningOutlined />}>Tarde</Tag>;
     }
-    return <Tag>{attendance.status}</Tag>;
+    if (attendance.status === 'INCOMPLETE') {
+      return <Tag color="red">Incompleto</Tag>;
+    }
   };
 
   return (

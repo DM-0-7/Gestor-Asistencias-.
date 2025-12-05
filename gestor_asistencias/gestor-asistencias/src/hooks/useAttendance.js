@@ -4,81 +4,96 @@ import { attendanceService } from '../services/attendanceService';
 export const useAttendance = (courseId) => {
   const [attendances, setAttendances] = useState([]);
   const [currentlyIn, setCurrentlyIn] = useState([]);
+  const [todayAttendances, setTodayAttendances] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchTodayAttendances = useCallback(async () => {
-    if (!courseId) return;
+  //  FUNCIÓN PRINCIPAL: Obtener TODAS las asistencias
+  const fetchAllAttendances = useCallback(async () => {
+    if (!courseId) {
+      console.warn(' No hay courseId, saltando fetch');
+      return;
+    }
     
     try {
       setLoading(true);
       setError(null);
-      const data = await attendanceService.getTodayAttendances(courseId);
+      
+      console.log('Obteniendo asistencias del curso:', courseId);
+      
+      // Llamar al endpoint /all
+      const data = await attendanceService.getAllCourseAttendances(courseId);
+      
+      console.log(' Datos recibidos:', data);
+      console.log(' Total:', data.length);
+      
+      // Guardar TODAS las asistencias
       setAttendances(data);
+      
+      // Filtrar los que están actualmente en el curso (sin checkOutTime)
+      const active = data.filter(a => !a.checkOutTime);
+      console.log(' Actualmente en curso:', active.length, active);
+      setCurrentlyIn(active);
+      
+      // Filtrar solo las de hoy
+      const today = new Date().toISOString().split('T')[0];
+      const todayData = data.filter(a => a.attendanceDate === today);
+      console.log('Asistencias de hoy:', todayData.length);
+      setTodayAttendances(todayData);
+      
     } catch (err) {
-      console.error('Error loading today attendances:', err);
+      console.error(' Error cargando asistencias:', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   }, [courseId]);
 
-  const fetchCurrentlyInCourse = useCallback(async () => {
-    if (!courseId) return;
-    
-    try {
-      const data = await attendanceService.getCurrentlyInCourse(courseId);
-      setCurrentlyIn(data);
-    } catch (err) {
-      console.error('Error loading currently in course:', err);
-    }
-  }, [courseId]);
-
+  //  Ejecutar cuando se monta o cambia courseId
   useEffect(() => {
+    console.log('🔄 useEffect ejecutado con courseId:', courseId);
     if (courseId) {
-      fetchTodayAttendances();
-      fetchCurrentlyInCourse();
+      fetchAllAttendances();
     }
-  }, [courseId, fetchTodayAttendances, fetchCurrentlyInCourse]);
+  }, [courseId, fetchAllAttendances]);
 
+  
   const checkIn = useCallback(async (userId) => {
     if (!courseId) return;
     
     try {
       setError(null);
+      console.log(' Haciendo check-in para userId:', userId);
+      
       const newAttendance = await attendanceService.checkIn(userId, courseId);
       
-      // Actualización local
-      setAttendances(prev => [...prev, newAttendance]);
+      console.log(' Check-in exitoso:', newAttendance);
       
-      await fetchCurrentlyInCourse();
-      await fetchTodayAttendances();
+      // IMPORTANTE: Refrescar después de check-in
+      await fetchAllAttendances();
       
       return newAttendance;
     } catch (err) {
-      console.error('Error in checkIn:', err);
+      console.error(' Error in checkIn:', err);
       setError(err.message);
       throw err;
     }
-  }, [courseId, fetchCurrentlyInCourse, fetchTodayAttendances]);
+  }, [courseId, fetchAllAttendances]);
 
+  
   const checkInLate = useCallback(async (userId) => {
     if (!courseId) return;
     
     try {
       setError(null);
-      console.log(' useAttendance - checkInLate llamado con userId:', userId);
+      console.log(' Haciendo check-in tarde para userId:', userId);
       
       const newAttendance = await attendanceService.checkInLate(userId, courseId);
       
-      console.log(' Respuesta de checkInLate:', newAttendance);
+      console.log(' Check-in tarde exitoso:', newAttendance);
       
-      // Actualización local
-      setAttendances(prev => [...prev, newAttendance]);
-      
-      
-      await fetchCurrentlyInCourse();
-      await fetchTodayAttendances();
+      // IMPORTANTE: Refrescar después de check-in
+      await fetchAllAttendances();
       
       return newAttendance;
     } catch (err) {
@@ -86,38 +101,38 @@ export const useAttendance = (courseId) => {
       setError(err.message);
       throw err;
     }
-  }, [courseId, fetchCurrentlyInCourse, fetchTodayAttendances]);
+  }, [courseId, fetchAllAttendances]);
 
+  
   const checkOut = useCallback(async (attendanceId) => {
     try {
       setError(null);
+      console.log(' Haciendo check-out para attendanceId:', attendanceId);
+      
       const updatedAttendance = await attendanceService.checkOut(attendanceId);
       
-      // Actualización local
-      setAttendances(prev =>
-        prev.map(att => att.id === attendanceId ? updatedAttendance : att)
-      );
+      console.log('Check-out exitoso:', updatedAttendance);
       
-      
-      await fetchCurrentlyInCourse();
-      await fetchTodayAttendances();
+      //  IMPORTANTE: Refrescar después de check-out
+      await fetchAllAttendances();
       
       return updatedAttendance;
     } catch (err) {
-      console.error('Error in checkOut:', err);
+      console.error(' Error in checkOut:', err);
       setError(err.message);
       throw err;
     }
-  }, [fetchCurrentlyInCourse, fetchTodayAttendances]);
+  }, [fetchAllAttendances]);
 
   return {
-    attendances,
-    currentlyIn,
+    attendances,        
+    currentlyIn,        
+    todayAttendances,  
     loading,
     error,
     checkIn,
     checkInLate, 
     checkOut,
-    refreshAttendances: fetchTodayAttendances
+    refreshAttendances: fetchAllAttendances
   };
 };
