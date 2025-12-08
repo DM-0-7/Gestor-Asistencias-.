@@ -9,7 +9,8 @@ export const attendanceService = {
       const response = await axios.get(`${API_BASE_URL}/course/${courseId}/all`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data || 'Error al obtener historial de asistencias');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Error al obtener historial de asistencias';
+      throw new Error(errorMessage);
     }
   },
 
@@ -19,7 +20,8 @@ export const attendanceService = {
       const response = await axios.get(`${API_BASE_URL}/course/${courseId}/today`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data || 'Error al obtener asistencias de hoy');
+      const errorMessage = error.response?.data.message || error.response?.data?.error || error.message || 'Error al obtener asistencias de hoy';
+      throw new Error(errorMessage);
     }
   },
 
@@ -29,7 +31,8 @@ export const attendanceService = {
       const response = await axios.get(`${API_BASE_URL}/course/${courseId}/currently-in`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data || 'Error al obtener usuarios actualmente en curso');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Error al obtener usuarios actualmente en curso';
+      throw new Error(errorMessage);
     }
   },
 
@@ -40,7 +43,8 @@ export const attendanceService = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data || 'Error al hacer check-in');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Error al hacer check-in';
+      throw new Error(errorMessage);
     }
   },
 
@@ -52,29 +56,47 @@ export const attendanceService = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data || 'Error al hacer check-in tarde');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Error al hacer check-in tarde';
+      throw new Error(errorMessage);
     }
   },
 
 
-  checkOut: async (attendanceId) => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/${attendanceId}/check-out`
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(error.response?.data || 'Error al hacer check-out');
-    }
-  },
+ checkOut: async (attendanceId) => {
+  try {
+    console.log(' Check-out para ID:', attendanceId);
+    
+    const response = await axios.post(
+      `${API_BASE_URL}/check-out/${attendanceId}` 
+    );
+    
+    console.log(' Check-out exitoso:', response.data);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Error al hacer check-out';
+    console.error('Error check-out:', error.response);
+    throw new Error(errorMessage);
+  }
+}
+,
 
-  // NUEVO: Obtener historial de un usuario específico
+  // Obtener historial de un usuario específico
   getUserAttendanceHistory: async (userId) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/user/${userId}/history`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data || 'Error al obtener historial del usuario');
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Error al obtener historial del usuario';
+      throw new Error(errorMessage);
+    }
+  },
+  getAttendancesByDateRange: async (courseId, startDate, endDate) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/course/${courseId}/by-date-range?startDate=${startDate}&endDate=${endDate}`);
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Error al obtener asistencias por rango de fechas';
+      throw new Error(errorMessage);
     }
   }
 };

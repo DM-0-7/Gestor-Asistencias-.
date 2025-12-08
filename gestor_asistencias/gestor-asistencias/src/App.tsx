@@ -10,7 +10,7 @@ const { Header, Content } = Layout;
 const { Title, Paragraph } = Typography;
 
 function App() {
-  const { courses, loading, error, addCourse, deleteCourse } = useCourses();
+  const { courses, loading, error, addCourse, deleteCourse,refreshCourses } = useCourses();
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -32,6 +32,10 @@ function App() {
   const closeAttendanceModal = () => {
     setIsModalOpen(false);
     setSelectedCourse(null);
+  };
+
+  const handleAtteendanceChange = async () => {
+    await refreshCourses();
   };
 
   return (
@@ -106,7 +110,12 @@ function App() {
           </Col>
         </Row>
 
-        <AttendanceModal course={selectedCourse} isOpen={isModalOpen} onClose={closeAttendanceModal} />
+        <AttendanceModal 
+        course={selectedCourse} 
+        isOpen={isModalOpen} 
+        onClose={closeAttendanceModal} 
+        onAttendanceChange={handleAtteendanceChange}
+        />
       </Content>
     </Layout>
   );

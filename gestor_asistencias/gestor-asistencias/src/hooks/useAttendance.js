@@ -124,6 +124,29 @@ export const useAttendance = (courseId) => {
     }
   }, [fetchAllAttendances]);
 
+  const fetchAttendanceByDateRange = useCallback(async (startDate, endDate) => {
+    if (!courseId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      console.log(` Obteniendo asistencias entre ${startDate} y ${endDate}`);
+
+      const data = await attendanceService.getAttendancesByDateRange(courseId, startDate, endDate);
+      console.log('Asistencias recibidas:', data.length);
+      setAttendances(data);
+      
+      const active = data.filter(a => !a.checkOutTime);
+      setCurrentlyIn(active);
+      
+    } catch (err) {
+      console.error(' Error cargando asistencias por rango:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [courseId]);
+
   return {
     attendances,        
     currentlyIn,        
@@ -133,6 +156,7 @@ export const useAttendance = (courseId) => {
     checkIn,
     checkInLate, 
     checkOut,
-    refreshAttendances: fetchAllAttendances
+    refreshAttendances: fetchAllAttendances,
+    fetchAttendanceByDateRange
   };
 };

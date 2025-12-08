@@ -1,13 +1,18 @@
 import { useState } from 'react';
-import { Modal, Input, Button, Space, Divider, Empty, message, Spin } from 'antd';
-import { LoginOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Modal, Input, Button, Space, Divider, Empty, message, Spin, DatePicker } from 'antd';
+import { LoginOutlined, UserOutlined, ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons';
 import { useAttendance } from '../hooks/useAttendance';
 import AttendanceUserCard from './AttendanceUserCard';
 
-const AttendanceModal = ({ course, isOpen, onClose }) => {
+const { RangePicker } = DatePicker;
+
+const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
   const [userId, setUserId] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [dateRange, setDateRange] = useState(null); //  Estado para el rango de fechas
   
+  const courseId = course?.id;
+
   const { 
     attendances, 
     currentlyIn, 
@@ -15,7 +20,8 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
     checkIn, 
     checkInLate,
     checkOut,
-    refreshAttendances
+    refreshAttendances,
+    fetchAttendancesByDateRange 
   } = useAttendance(course?.id);
 
   const handleCheckIn = async () => {
@@ -27,6 +33,10 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
     setProcessing(true);
     try {
       await checkIn(parseInt(userId));
+      await refreshAttendances();
+      if (onAttendanceChange) {
+        onAttendanceChange();
+      }
       setUserId('');
       message.success(' Check-in registrado (A tiempo)');
     } catch (err) {
@@ -46,10 +56,14 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
     setProcessing(true);
     try {
       await checkInLate(parseInt(userId));
+      await refreshAttendances();
+      if (onAttendanceChange) {
+        onAttendanceChange();
+      }
       setUserId('');
       message.warning(' Check-in registrado (TARDE)');
     } catch (err) {
-      console.error(' Error en handleCheckInLate:', err);
+      console.error('Error en handleCheckInLate:', err);
       message.error(` ${err.message}`);
     } finally {
       setProcessing(false);
@@ -60,7 +74,10 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
     setProcessing(true);
     try {
       await checkOut(attendanceId);
-      message.success(' Check-out registrado exitosamente');
+      if (onAttendanceChange) {
+        onAttendanceChange();
+      }
+      message.success('Check-out registrado exitosamente');
     } catch (err) {
       console.error(' Error capturado', err);
       message.error(` ${err.message}`);
@@ -92,7 +109,34 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
     }
   };
 
- 
+  const handleDateRangeChange = async (dates) => {
+    if (dates && dates.length === 2) {
+      const startDate = dates[0].format('YYYY-MM-DD');
+      const endDate = dates[1].format('YYYY-MM-DD');
+      
+      console.log(' Filtrando desde', startDate, 'hasta', endDate);
+      setDateRange(dates);
+      
+      try {
+        await fetchAttendancesByDateRange(startDate, endDate);
+        message.success(` Mostrando asistencias del ${startDate} al ${endDate}`);
+      } catch (err) {
+        message.error(` Error: ${err.message}`);
+      }
+    } else {
+      // Si se borra el rango, mostrar todas las asistencias
+      setDateRange(null);
+      await refreshAttendances();
+      message.info(' Mostrando todas las asistencias');
+    }
+  };
+
+  const handleClearFilter = async () => {
+    setDateRange(null);
+    await refreshAttendances();
+    message.info('🔄 Filtro eliminado, mostrando todas las asistencias');
+  };
+
   return (
     <Modal
       title={`Asistencias - ${course?.nombre || ''}`}
@@ -103,6 +147,8 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
       centered
     >
       <Space direction="vertical" style={{ width: '100%' }} size="large">
+        
+        {/* Check-in section */}
         <div style={{ background: '#f5f5f5', padding: 16, borderRadius: 8 }}>
           <h4>Registrar Entrada</h4>
           <Space.Compact style={{ width: '100%', marginBottom: 12 }}>
@@ -144,6 +190,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
           </Space>
         </div>
 
+        {/* Currently in course section */}
         <div>
           <h4> Actualmente en el Curso ({currentlyIn.length})</h4>
           <Divider style={{ margin: '12px 0' }} />
@@ -165,15 +212,40 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
           )}
         </div>
 
+        {/* Sección de filtros por rango de fechas */}
         <div>
-          <h4> Asistencias de Hoy ({attendances.length})</h4>
+          <Space 
+            align="center" 
+            style={{ marginBottom: 12, width: '100%', justifyContent: 'space-between' }}
+          >
+            <h4 style={{ margin: 0 }}> Historial de Asistencias ({attendances.length})</h4>
+            <Space>
+              <RangePicker
+                value={dateRange}
+                onChange={handleDateRangeChange}
+                format="YYYY-MM-DD"
+                placeholder={['Fecha Inicio', 'Fecha Fin']}
+                suffixIcon={<CalendarOutlined />}
+              />
+              {dateRange && (
+                <Button onClick={handleClearFilter} size="small">
+                  Limpiar Filtro
+                </Button>
+              )}
+            </Space>
+          </Space>
+          
           <Divider style={{ margin: '12px 0' }} />
+          
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40 }}>
               <Spin size="large" />
             </div>
           ) : attendances.length === 0 ? (
-            <Empty description="No hay registros de asistencia hoy" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            <Empty 
+              description={dateRange ? "No hay registros en este rango de fechas" : "No hay registros de asistencia"} 
+              image={Empty.PRESENTED_IMAGE_SIMPLE} 
+            />
           ) : (
             <Space direction="vertical" style={{ width: '100%' }}>
               {attendances.map((attendance) => (
@@ -181,7 +253,7 @@ const AttendanceModal = ({ course, isOpen, onClose }) => {
                   key={attendance.id}
                   attendance={attendance}
                   onCheckOut={handleCheckOut}
-                  onDelete={handleDelete} 
+                  onDelete={handleDelete}
                   isActive={!attendance.checkOutTime}
                   disabled={processing}
                 />

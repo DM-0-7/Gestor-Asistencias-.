@@ -53,7 +53,9 @@ public Attendance checkIn(Long userId, Long courseId) {
     attendance.setStatus("INCOMPLETE");
     attendance.setCreatedAt(LocalDateTime.now());
     
-    return attendanceRepository.save(attendance);
+  Attendance saved = attendanceRepository.save(attendance);
+  updateCourseAttendeeCount(courseId);
+    return saved;
 }
 
     
@@ -169,5 +171,11 @@ public Attendance checkOut(Long attendanceId) {
     List<Attendance> allAttendances = attendanceRepository.findByCourseIdOrderByCheckInTimeDesc(courseId);
     System.out.println("   Total histórico: " + allAttendances.size());  
     return allAttendances;
+    }
+    public List<Attendance> getAttendancesByDateRange(Long courseId, LocalDate startDate, LocalDate endDate) {
+        System.out.println("Obteniendo asistencias del curso" + courseId + "entre" + startDate + "y" + endDate);
+        List<Attendance> attendances = attendanceRepository.findByCourseIdAndAttendanceDateBetween(courseId, startDate, endDate);
+        System.out.println("Total encontradas: " + attendances.size());
+        return attendances;
     }
 }

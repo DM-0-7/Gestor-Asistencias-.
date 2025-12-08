@@ -1,4 +1,4 @@
-import { Card, Tag, Button, Space, Popconfirm } from 'antd';
+import { Card, Tag, Button, Space, Popconfirm, Badge } from 'antd';
 import { 
   UserOutlined, 
   ClockCircleOutlined, 
@@ -8,7 +8,7 @@ import {
   DeleteOutlined  
 } from '@ant-design/icons';
 
-const AttendanceUserCard = ({ attendance, onCheckOut, onDelete, isActive }) => {
+const AttendanceUserCard = ({ attendance, onCheckOut, onDelete, isActive, disabled }) => {
   const formatTime = (dateTime) => {
     if (!dateTime) return '--:--';
     return new Date(dateTime).toLocaleTimeString('es-MX', {
@@ -17,19 +17,38 @@ const AttendanceUserCard = ({ attendance, onCheckOut, onDelete, isActive }) => {
     });
   };
 
+  // 🚦 Función para obtener el color del semáforo
+  const getStatusColor = () => {
+    if (!attendance.checkOutTime) {
+      return '#1890ff'; 
+    }
+    
+    switch(attendance.status) {
+      case 'PRESENT':
+        return '#52c41a'; 
+      case 'LATE':
+        return '#faad14'; 
+      case 'INCOMPLETE':
+        return '#d9d9d9'; 
+      default:
+        return '#d9d9d9';
+    }
+  };
+
   const getStatusTag = () => {
     if (!attendance.checkOutTime) {
       return <Tag color="blue">En curso</Tag>;
     }
     if (attendance.status === 'PRESENT') {
-      return <Tag color="success" icon={<CheckCircleOutlined />}>Presente</Tag>;
+      return <Tag color="success" icon={<CheckCircleOutlined />}>A tiempo</Tag>;
     }
     if (attendance.status === 'LATE') {
       return <Tag color="warning" icon={<WarningOutlined />}>Tarde</Tag>;
     }
     if (attendance.status === 'INCOMPLETE') {
-      return <Tag color="red">Incompleto</Tag>;
+      return <Tag color="default">Incompleto</Tag>;
     }
+    return <Tag color="default">{attendance.status}</Tag>;
   };
 
   return (
@@ -43,6 +62,11 @@ const AttendanceUserCard = ({ attendance, onCheckOut, onDelete, isActive }) => {
       <Space direction="vertical" style={{ width: '100%' }} size="small">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
+            {/* SEMÁFORO */}
+            <Badge 
+              color={getStatusColor()} 
+              style={{ marginRight: 4 }}
+            />
             <UserOutlined style={{ fontSize: 18 }} />
             <span style={{ fontWeight: 600 }}>Usuario ID: {attendance.userId}</span>
           </Space>
@@ -71,6 +95,7 @@ const AttendanceUserCard = ({ attendance, onCheckOut, onDelete, isActive }) => {
               style={{ flex: 1 }}
               icon={<LogoutOutlined />}
               onClick={() => onCheckOut(attendance.id)}
+              disabled={disabled}
             >
               Registrar Salida
             </Button>
@@ -86,6 +111,7 @@ const AttendanceUserCard = ({ attendance, onCheckOut, onDelete, isActive }) => {
               <Button
                 danger
                 icon={<DeleteOutlined />}
+                disabled={disabled}
               >
                 Eliminar
               </Button>
