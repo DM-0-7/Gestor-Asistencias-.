@@ -1,0 +1,72 @@
+package com.jajaja.x.controller;
+
+import com.jajaja.x.model.Attendance;
+import com.jajaja.x.service.AttendanceService;
+import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/attendances")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
+public class AttendanceController {
+    
+    private final AttendanceService attendanceService;
+      @GetMapping("/course/{courseId}/all")
+    public ResponseEntity<List<Attendance>> getAllCourseAttendances(@PathVariable Long courseId) {
+        System.out.println("Solicitud recibida para obtener todas las asistencias del curso ID: " + courseId);
+        return ResponseEntity.ok(attendanceService.getAllCourseAttendances(courseId));
+    }
+    
+    @PostMapping("/check-in")
+    public ResponseEntity<Attendance> checkIn(
+        @RequestParam Long userId,
+        @RequestParam Long courseId
+    ) {
+        return ResponseEntity.ok(attendanceService.checkIn(userId, courseId));
+    }
+
+    @PostMapping ("/check-in-late")
+    public ResponseEntity<Attendance> checkInLate(
+    @RequestParam Long userId,  
+    @RequestParam Long courseId
+    ) {
+        Attendance attendance = attendanceService.checkInLate(userId, courseId);
+        System.out.println("Check-in tarde registrado- Usuario:" + userId + ", ID " + attendance.getId());
+        return ResponseEntity.ok(attendance);
+    }
+    
+    @PostMapping("/check-out/{attendanceId}")
+    public ResponseEntity<Attendance> checkOut(@PathVariable Long attendanceId) {
+        return ResponseEntity.ok(attendanceService.checkOut(attendanceId));
+    }
+    
+    @GetMapping("/course/{courseId}/today")
+    public ResponseEntity<List<Attendance>> getTodayAttendances(@PathVariable Long courseId) {
+        return ResponseEntity.ok(attendanceService.getTodayAttendances(courseId));
+    }
+    
+    @GetMapping("/course/{courseId}/currently-in")
+    public ResponseEntity<List<Attendance>> getCurrentlyInCourse(@PathVariable Long courseId) {
+        return ResponseEntity.ok(attendanceService.getCurrentlyInCourse(courseId));
+    }
+    
+    @GetMapping("/user/{userId}/history")
+    public ResponseEntity<List<Attendance>> getUserAttendanceHistory(@PathVariable Long userId) {
+        return ResponseEntity.ok(attendanceService.getAttendanceHistory(userId));
+    }
+
+   @GetMapping("/course/{courseId}/by-date-range")
+    public List<Attendance> getAttendancesByDateRange(
+        @PathVariable Long courseId,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        return attendanceService.getAttendancesByDateRange(courseId, startDate, endDate);
+    }
+}
