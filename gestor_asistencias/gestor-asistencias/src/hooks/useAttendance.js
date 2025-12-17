@@ -124,7 +124,7 @@ export const useAttendance = (courseId) => {
     }
   }, [fetchAllAttendances]);
 
-  const fetchAttendanceByDateRange = useCallback(async (startDate, endDate) => {
+  const fetchAttendancesByDateRange = useCallback(async (startDate, endDate) => {
     if (!courseId) return;
     
     try {
@@ -157,6 +157,6 @@ export const useAttendance = (courseId) => {
     checkInLate, 
     checkOut,
     refreshAttendances: fetchAllAttendances,
-    fetchAttendanceByDateRange
+    fetchAttendancesByDateRange
   };
 };

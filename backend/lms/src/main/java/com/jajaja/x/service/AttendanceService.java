@@ -113,6 +113,8 @@ public Attendance checkOut(Long attendanceId) {
     } else {
         attendance.setStatus("PRESENT"); 
     }
+
+    //attendance.setStatus("late".equals(attendance.getStatus()) ? "LATE" : "PRESENT");
     
     Attendance saved = attendanceRepository.save(attendance);
     
