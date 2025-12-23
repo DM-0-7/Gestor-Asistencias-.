@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Modal, Input, Button, Space, Divider, Empty, message, Spin, DatePicker } from 'antd';
-import { LoginOutlined, UserOutlined, ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons';
+import { Modal, Input, Button, Space, Divider, Empty, message, Spin, DatePicker, Dropdown } from 'antd';
+import { LoginOutlined, UserOutlined, ClockCircleOutlined, CalendarOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useAttendance } from '../hooks/useAttendance';
 import AttendanceUserCard from './AttendanceUserCard';
+import { exportService } from '../services/exportService';
 
 const { RangePicker } = DatePicker;
 
 const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
   const [userId, setUserId] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [dateRange, setDateRange] = useState(null); //  Estado para el rango de fechas
+  const [dateRange, setDateRange] = useState(null); //estado para rango de fechas 
   
   const courseId = course?.id;
 
@@ -26,7 +27,7 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
 
   const handleCheckIn = async () => {
     if (!userId || userId.trim() === '') {
-      message.warning('Ingresa un ID de usuario válido');
+      message.warning(' Ingresa un ID de usuario válido');
       return;
     }
 
@@ -49,7 +50,7 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
 
   const handleCheckInLate = async () => {
     if (!userId || userId.trim() === '') {
-      message.warning('Ingresa un ID de usuario válido');
+      message.warning(' Ingresa un ID de usuario válido');
       return;
     }
 
@@ -63,7 +64,7 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
       setUserId('');
       message.warning(' Check-in registrado (TARDE)');
     } catch (err) {
-      console.error('Error en handleCheckInLate:', err);
+      console.error(' Error en handleCheckInLate:', err);
       message.error(` ${err.message}`);
     } finally {
       setProcessing(false);
@@ -77,7 +78,7 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
       if (onAttendanceChange) {
         onAttendanceChange();
       }
-      message.success('Check-out registrado exitosamente');
+      message.success(' Check-out registrado exitosamente');
     } catch (err) {
       console.error(' Error capturado', err);
       message.error(` ${err.message}`);
@@ -124,7 +125,6 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
         message.error(` Error: ${err.message}`);
       }
     } else {
-      // Si se borra el rango, mostrar todas las asistencias
       setDateRange(null);
       await refreshAttendances();
       message.info(' Mostrando todas las asistencias');
@@ -137,9 +137,44 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
     message.info('🔄 Filtro eliminado, mostrando todas las asistencias');
   };
 
+  // ⭐ NUEVO: Handler para exportar
+  const handleExport = (format) => {
+    if (attendances.length === 0) {
+      message.warning(' No hay datos para exportar');
+      return;
+    }
+
+    try {
+      if (format === 'excel') {
+        exportService.exportToExcel(attendances, course?.nombre || 'Curso');
+        message.success(' Excel descargado exitosamente');
+      } else if (format === 'csv') {
+        exportService.exportToCSV(attendances, course?.nombre || 'Curso');
+        message.success(' CSV descargado exitosamente');
+      }
+    } catch (error) {
+      console.error('Error exportando:', error);
+      message.error(' Error al exportar archivo');
+    }
+  };
+
+  // ⭐ Menú para el dropdown de exportación
+  const exportMenuItems = [
+    {
+      key: 'excel',
+      label: ' Exportar Excel (.xlsx)',
+      onClick: () => handleExport('excel')
+    },
+    {
+      key: 'csv',
+      label: ' Exportar CSV',
+      onClick: () => handleExport('csv')
+    }
+  ];
+
   return (
     <Modal
-      title={`Asistencias - ${course?.nombre || ''}`}
+      title={` Asistencias - ${course?.nombre || ''}`}
       open={isOpen}
       onCancel={onClose}
       width={800}
@@ -150,7 +185,7 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
         
         {/* Check-in section */}
         <div style={{ background: '#f5f5f5', padding: 16, borderRadius: 8 }}>
-          <h4>Registrar Entrada</h4>
+          <h4> Registrar Entrada</h4>
           <Space.Compact style={{ width: '100%', marginBottom: 12 }}>
             <Input
               placeholder="ID del usuario"
@@ -174,7 +209,7 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
               loading={processing}
               disabled={processing}
             >
-               A Tiempo
+              A Tiempo
             </Button>
             <Button 
               danger
@@ -212,13 +247,16 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
           )}
         </div>
 
-        {/* Sección de filtros por rango de fechas */}
+        {/* Historial + filtros + exportación */}
         <div>
           <Space 
             align="center" 
             style={{ marginBottom: 12, width: '100%', justifyContent: 'space-between' }}
           >
-            <h4 style={{ margin: 0 }}> Historial de Asistencias ({attendances.length})</h4>
+            <h4 style={{ margin: 0 }}>
+              Historial de Asistencias ({attendances.length})
+            </h4>
+
             <Space>
               <RangePicker
                 value={dateRange}
@@ -227,10 +265,28 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
                 placeholder={['Fecha Inicio', 'Fecha Fin']}
                 suffixIcon={<CalendarOutlined />}
               />
+
               {dateRange && (
                 <Button onClick={handleClearFilter} size="small">
                   Limpiar Filtro
                 </Button>
+              )}
+
+              {/* Botón de exportación */}
+              {attendances.length > 0 && (
+                <Dropdown 
+                  menu={{ items: exportMenuItems }}
+                  placement="bottomRight"
+                  trigger={['click']}
+                >
+                  <Button 
+                    type="primary" 
+                    icon={<DownloadOutlined />}
+                    size="middle"
+                  >
+                    Exportar
+                  </Button>
+                </Dropdown>
               )}
             </Space>
           </Space>
@@ -239,7 +295,7 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
           
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40 }}>
-              <Spin size="large" />
+              <Spin size="large" tip="Cargando..." />
             </div>
           ) : attendances.length === 0 ? (
             <Empty 
@@ -261,6 +317,7 @@ const AttendanceModal = ({ course, isOpen, onClose, onAttendanceChange }) => {
             </Space>
           )}
         </div>
+
       </Space>
     </Modal>
   );
